@@ -1,10 +1,7 @@
 -- 0-uniq_users.sql
--- Script to create the 'users' table with specified attributes
--- The 'users' table includes:
--- - id: integer, never null, auto increment, primary key
--- - email: string (255 characters), never null, unique
--- - name: string (255 characters)
+-- SQL script to create a table 'users' with specified attributes
 
+-- Create table 'users' with id, email, and name columns
 CREATE TABLE IF NOT EXISTS users (
     id INT NOT NULL AUTO_INCREMENT,
     email VARCHAR(255) NOT NULL UNIQUE,
