@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Caching request module.
+Web caching and request tracking module.
 """
 import redis
 import requests
@@ -9,12 +9,12 @@ from typing import Callable
 
 
 def track_get_page(fn: Callable) -> Callable:
-    """Decorator for get_page to track URL access and cache responses."""
+    """Decorator to track URL access and cache responses with expiration."""
     @wraps(fn)
     def wrapper(url: str) -> str:
         """Wrapper that:
-        - Checks whether a URL's data is cached.
-        - Tracks how many times get_page is called.
+        - Tracks how many times a URL is accessed in Redis.
+        - Caches the response with a 10-second expiration.
         """
         client = redis.Redis()
         client.incr(f'count:{url}')
@@ -22,13 +22,18 @@ def track_get_page(fn: Callable) -> Callable:
         if cached_page:
             return cached_page.decode('utf-8')
         response = fn(url)
-        client.set(f'{url}', response, 10)
+        client.setex(f'{url}', 10, response)
         return response
     return wrapper
 
 
 @track_get_page
 def get_page(url: str) -> str:
-    """Make an HTTP request to a given URL."""
+    """Fetch HTML content from a given URL."""
     response = requests.get(url)
     return response.text
+
+
+if __name__ == "__main__":
+    url = "http://slowwly.robertomurray.co.uk"
+    print(get_page(url))
